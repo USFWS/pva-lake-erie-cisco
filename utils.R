@@ -28,7 +28,6 @@ colnames(sim.bio) <- c("Linf","K","t0","lw.a","lw.b","f.a","f.b","f.type","eggsu
 sim.length <- data.frame()
 sim.weight <- data.frame()
 sim.natmort <- data.frame()
-#sim.survival <- data.frame()
 sim.fecundity <- data.frame()
 sim.eggS <- data.frame()
 sim.fryS <- data.frame()
@@ -87,25 +86,8 @@ for (j in 1:n.simulations) {
 
 	fecundity <- abs(fecundity)
 	
-	
 	natmort <- 3 * (weight^-0.288)
 	
-#	Mchange <- runif(1, -0.30, 0.30)
-#	natmort <- as.double(natmort + (natmort * Mchange))
-
-
-#  if (fishery.use == "Yes") {
-#    Z.mort <- natmort + F.partial
-#  } else {
-#    Z.mort <- natmort
-#  }
-	
-#	if (customS.use == "Default") {
-#	  survival <- exp(-Z.mort)
-#	} else {
-#	  survival <- S.custom
-#	}
-
 	# Store Life History Parameters
 	sim.bio[j,1] <- Linf
 	sim.bio[j,2] <- K
@@ -123,7 +105,6 @@ for (j in 1:n.simulations) {
 	sim.length <- rbind(sim.length,length)
   	sim.weight <- rbind(sim.weight,weight)
 	sim.natmort <- rbind(sim.natmort,natmort)
-#	sim.survival <- rbind(sim.survival,survival)
 	sim.fecundity <- rbind(sim.fecundity,fecundity)
 	sim.eggS <- rbind(sim.eggS,eggS)
 	sim.fryS <- rbind(sim.fryS,fryS)
@@ -136,7 +117,6 @@ for (j in 1:n.simulations) {
 colnames(sim.length) <- sprintf("Age%02d",1:max(age))
 colnames(sim.weight) <- sprintf("Age%02d",1:max(age))
 colnames(sim.natmort) <- sprintf("Age%02d",1:max(age))
-#colnames(sim.survival) <- sprintf("Age%02d",1:max(age))
 colnames(sim.fecundity) <- sprintf("Age%02d",1:max(age))
 
 
