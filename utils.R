@@ -298,6 +298,8 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 
 	pop.thresh <- area.lake * thresh.allee
 
+	Sh <- runif(1, 0.12, 0.5)		#survival immediately after stocking
+
 	# process stocked early life stages
 	if (any(stocking.pro$age < 1)) {
 	  for (i in 1:t) {
@@ -331,7 +333,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 	        stocking.juv <- stocking.juv %>% mutate(age1.eq = case_when(
 	          age == -2 ~ Sfry * Sage0 * nums * S.hatch,
 	          age == -1 ~ Sage0 * nums * S.hatch,
-	          age == 0 ~ nums * S.hatch))	        
+	          age == 0 ~ nums * S.hatch * Sh))	        
 
 	        age1.eq.tot <- sum(stocking.juv$age1.eq)
 
@@ -412,8 +414,6 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 		#A.wild[n.age,n.age] <- 0	#==>comment out if using a plus group
 		lambda.Awild[i] <- lambda(A.wild)
 
-#    Sh <- runif(1, 0, 0.5)		#survival immediately after stocking
-
 		lx.month <- lx ^ (1/12)
 		n.month.remain <- 12 - stocking.adult$month - 1
 		lx.partial <- lx.month ^ n.month.remain
@@ -444,8 +444,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 			if (i == n.stockpro + 1) {
 				n.stocked[,i] <- 0
 			} else {
-#				n.stocked[,i] <- stocking.pro[,i+1] * Sh
-				n.stocked[,i] <- stocking.adult[,i+2] * 0.5     # assume half are female
+				n.stocked[,i] <- stocking.adult[,i+2] * Sh * 0.5     # assume half are female
 				
 			}
 		} else {
