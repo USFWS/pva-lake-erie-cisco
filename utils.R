@@ -314,7 +314,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 
 	        colnames(stocking.juv) <- c("age","month","nums")
 
-	        stocking.juv$nums <- stocking.juv$nums * 0.5        # assume half are female
+	        stocking.juv$nums <- stocking.juv$nums * Sh * 0.5        # assume half are female
 
 	        # monthly survival for wild egg, fry, and age 0
 	        eggS.wild.month <- Segg
@@ -333,7 +333,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 	        stocking.juv <- stocking.juv %>% mutate(age1.eq = case_when(
 	          age == -2 ~ Sfry * Sage0 * nums * S.hatch,
 	          age == -1 ~ Sage0 * nums * S.hatch,
-	          age == 0 ~ nums * S.hatch * Sh))	        
+	          age == 0 ~ nums * S.hatch))	        
 
 	        age1.eq.tot <- sum(stocking.juv$age1.eq)
 
@@ -356,6 +356,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 	    stocking.adult <- subset(stocking.pro,stocking.pro$age > 0)
       	    n.var <- runif(n.stockpro, -0.25, 0.25)
             stocking.adult[-1:-2] <- stocking.adult[-1:-2] + (stocking.adult[-1:-2] * n.var)
+	    stocking.adult[-1:-2] <- stocking.adult[-1:-2] * Sh
 	  } else {
 	    stocking.adult <- data.frame(matrix(nrow = 1, ncol = n.stockpro + 2))
 	    stocking.adult[1,1] <- 1
@@ -444,7 +445,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 			if (i == n.stockpro + 1) {
 				n.stocked[,i] <- 0
 			} else {
-				n.stocked[,i] <- stocking.adult[,i+2] * Sh * 0.5     # assume half are female
+				n.stocked[,i] <- stocking.adult[,i+2] * 0.5     # assume half are female
 				
 			}
 		} else {
