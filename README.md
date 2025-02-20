@@ -10,7 +10,7 @@ Information about restoring coregonines to the Great Lakes can be found [here](h
 
 ## Installation
 
-Start an R session and run these lines:
+R version 4.4.2 or higer is required. Start an R session and run these lines:
 
 `list.of.packages <- c("compositions","dplyr","EnvStats","ggplot2","mpmsim","popbio","readxl",
 "reshape2","rhandsontable","shiny","shinyalert","shinycssloaders","shinydashboard","shinyjs",
