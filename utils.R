@@ -573,7 +573,8 @@ end.stats <- quantile(end.pop,probs=c(0.05,0.25,0.50,0.75,0.95),na.rm=TRUE)
 tend.stats <- t(end.stats)
 tend.stats <- as.data.frame(tend.stats)
 colnames(tend.stats) <- c("P05","P25","Median","P75","P95")
-
+tend.stats <- format(round(tend.stats, digits=0), nsmall = 0)
+	
 
 #-Median Mature Population Size by Year Over All Simulations-------------------------------------------------------------------
 sim.mature.pop <- as.data.frame(sim.mature.pop)
@@ -594,6 +595,7 @@ endmat.stats <- quantile(endmat.pop,probs=c(0.05,0.25,0.50,0.75,0.95),na.rm=TRUE
 tendmat.stats <- t(endmat.stats)
 tendmat.stats <- as.data.frame(tendmat.stats)
 colnames(tendmat.stats) <- c("P05","P25","Median","P75","P95")
+tendmat.stats <- format(round(tendmat.stats, digits=0), nsmall = 0)
 
 
 #-Median Population Size of Each Origin by Year Over All Simulations-----------------------------------------------------------
@@ -656,6 +658,7 @@ endmat.hatchery.stats <- quantile(endmat.hatchery,probs=c(0.05,0.25,0.50,0.75,0.
 tendmat.hatchery.stats <- t(endmat.hatchery.stats)
 tendmat.hatchery.stats <- as.data.frame(tendmat.hatchery.stats)
 colnames(tendmat.hatchery.stats) <- c("P05","P25","Median","P75","P95")
+tendmat.hatchery.stats <- format(round(tendmat.hatchery.stats, digits=0), nsmall = 0)
 tendmat.hatchery.stats$Origin <- "Hatchery"
 
 endmat.other <- tsim.mature.other[n.projections,]
@@ -663,6 +666,7 @@ endmat.other.stats <- quantile(endmat.other,probs=c(0.05,0.25,0.50,0.75,0.95),na
 tendmat.other.stats <- t(endmat.other.stats)
 tendmat.other.stats <- as.data.frame(tendmat.other.stats)
 colnames(tendmat.other.stats) <- c("P05","P25","Median","P75","P95")
+tendmat.other.stats <- format(round(tendmat.other.stats, digits=0), nsmall = 0)
 tendmat.other.stats$Origin <- "Wild"
 
 end.origin.stats <- rbind(tendmat.hatchery.stats,tendmat.other.stats)
