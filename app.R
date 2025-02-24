@@ -781,7 +781,7 @@ server <- function(input, output, session) {
    
    if (any(stocking.pro$age == 0)) {
      check3 <- subset(stocking.pro,stocking.pro$age == 0)
-     if (any(check3$month < 7)) {
+     if (any(check3$month < 6)) {
        validate("age 0 can only be stocked in months 6 through 12")
      }
    }   
@@ -973,7 +973,7 @@ server <- function(input, output, session) {
     sim_popquantile <- as.data.frame(pva()[[3]]$tpop.quantile)
 
     ggplot(data = sim_popquantile) +
-      geom_ribbon(aes(x=Year, ymin=P25/1000, ymax=P75/1000), fill="lightblue1", alpha=0.5) +
+      geom_ribbon(aes(x=Year, ymin=P25/1000, ymax=P75/1000), fill="lightblue1", alpha=0.8) +
       geom_line(aes(x=Year, y=Median/1000), color="cornflowerblue", linewidth=1) +
       labs(x="Year",y="000s of fish") +
       scale_x_continuous(breaks=seq(1,input$n.projections,5)) +
@@ -998,7 +998,7 @@ server <- function(input, output, session) {
     sim_matquantile <- as.data.frame(pva()[[3]]$tmature.quantile)
 
     ggplot(data = sim_matquantile) +
-      geom_ribbon(aes(x=Year, ymin=P25/1000, ymax=P75/1000), fill="rosybrown2", alpha=0.5) +
+      geom_ribbon(aes(x=Year, ymin=P25/1000, ymax=P75/1000), fill="rosybrown2", alpha=0.8) +
       geom_line(aes(x=Year, y=Median/1000), color="rosybrown4", linewidth=1) +
       labs(x="Year",y="000s of fish") +
       scale_x_continuous(breaks=seq(1,input$n.projections,5)) +
