@@ -393,9 +393,16 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
     
     mx <- sexratio * maturity * fecundity * Segg * Sfry.boom * Sage0
     
-    
-	  Mchange <- runif(1, -0.30, 0.30)
-    Mw <- as.double(Mw + (Mw * Mchange))
+    M.rand.age1 <- runif(1, -0.30, 0.30)
+    M.rand.age2up <- runif(1, -0.10, 0.10)
+
+    for (k in 1:n.age) {
+      if (k == 1) {
+        Mw[k] <- as.double(Mw[k] + (Mw[k] * M.rand.age1))
+      } else {
+        Mw[k] <- as.double(Mw[k] + (Mw[k] * M.rand.age2up))
+      }
+    }
     
       if (fishery.use == "Yes") {
         Z.mort <- Mw + F.partial
