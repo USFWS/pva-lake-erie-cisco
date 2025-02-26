@@ -240,7 +240,7 @@ ui <- dashboardPage(skin = "blue",
                                         box(title="Recruitment Dynamics",status="primary",solidHeader=TRUE,width=NULL,
                                             radioButtons("boom.sel","Apply boom years",threat.apply),
                                             numericInput("YC.period","Boom year frequency (every n years)",4,min=1,max=20,step=1),
-                                            numericInput("pct.boom","Percent increase fry survival",600,min=10,max=1000,step=50)
+                                            numericInput("pct.boom","Percent increase fry survival",600,min=10,max=1000,step=10)
                                             )))
             ),
 
