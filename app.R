@@ -693,25 +693,25 @@ server <- function(input, output, session) {
   ##  CUSTOM AGE-1+ NATURAL MORTALITY INPUT  #######
   ################################################## 
   # Create a reactive value to hold the data
-  customS <- reactiveValues(data = NULL)
+  customM <- reactiveValues(data = NULL)
   
   # Initialize the table with sequential column names and no initial data
   observe({
-    if (is.null(customS$data)) {
+    if (is.null(customM$data)) {
       agenum <- sprintf("age%d",seq(1:15))
       # Initialize an empty data frame with sequential column names
-      customS$data <- setNames(data.frame(matrix(ncol = 15, nrow = 1)), agenum)
+      customM$data <- setNames(data.frame(matrix(ncol = 15, nrow = 1)), agenum)
     }
   })
   
   observe({
     if (!is.null(input$hot))
-      customS$data <- hot_to_r(input$hot)
+      customM$data <- hot_to_r(input$hot)
   })
   
   # Render the rhandsontable
   output$hot <- renderRHandsontable({
-    if (!is.null(customS$data)) {
+    if (!is.null(customM$data)) {
       rhandsontable(customM$data, readOnly = (input$adv.adultM.sel == "Default")) %>%
         hot_col(col = seq_len(ncol(customM$data)), type = "numeric")  # Ensure numeric columns
     }
