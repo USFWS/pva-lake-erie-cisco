@@ -16,7 +16,7 @@ estBetaParams <- function(mu, var) {
 #==============================================================================================================================
 #=GENERATE LIFE HISTORY PARAMETERS=============================================================================================
 #==============================================================================================================================
-lifehistory.sims <- function(n.simulations,age,vonB,n.vonB,lw,n.lw,fecund,n.fecund,earlyS)
+lifehistory.sims <- function(n.simulations,age,vonB,n.vonB,lw,n.lw,fecund,n.fecund,earlyS,customM.use,M.custom)
 {
 
 
@@ -85,7 +85,11 @@ for (j in 1:n.simulations) {
 
 	fecundity <- abs(fecundity)
 	
-	natmort <- 3 * (weight^-0.288)
+	if (customM.use == "Default") {
+	  natmort <- 3 * (weight^-0.288)
+	} else {
+	  natmort <- M.custom
+	}
 	
 	# Store Life History Parameters
 	sim.bio[j,1] <- Linf
@@ -134,7 +138,7 @@ return(list(sim.bio = sim.bio, sim.length = sim.length, sim.weight = sim.weight,
 #=RUN SIMULATIONS==============================================================================================================
 #==============================================================================================================================
 sims.run <- function(n.projections,n.simulations,age,sexratio,maturity,sim.bio,sim.natmort,
-                     fishery.use,F.partial,customS.use,S.custom,sim.weight,sim.fecundity,
+                     fishery.use,F.partial,sim.weight,sim.fecundity,
                      sim.eggS,sim.fryS,sim.age0S,stocking.pro,area.lake,thresh.allee,boom.use,int.boom,boom.inc)
 
 {
@@ -204,7 +208,7 @@ for (j in 1:n.simulations) {
 
 	# Run Population Projections
 	p <- pop.stockpro(n.projections, sexratio, maturity, fecundity, mx.stocked, Mw, 
-	                  fishery.use, F.partial,customS.use, S.custom, waa, area.lake, thresh.allee,
+	                  fishery.use, F.partial, waa, area.lake, thresh.allee,
 	                  Segg, Sfry, Sage0, stocking.pro, boom.use, int.boom, boom.inc)
 
 	# Store Projection Results
@@ -262,7 +266,7 @@ return(list(sim.pop = sim.pop, sim.popwt = sim.popwt, sim.wild = sim.wild, sim.s
 #=LESLIE MATRIX POPULATION PROJECTIONS=========================================================================================
 #==============================================================================================================================
 pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocked, Mw, 
-                         fishery.use, F.partial,customS.use, S.custom, waa, area.lake, thresh.allee,
+                         fishery.use, F.partial, waa, area.lake, thresh.allee,
                          Segg, Sfry, Sage0, stocking.pro, boom.use, int.boom, boom.inc )
 {
 
@@ -409,11 +413,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
         Z.mort <- Mw
       }
     
-    	if (customS.use == "Default") {
-    	  Sw <- exp(-Z.mort)
-    	} else {
-    	  Sw <- S.custom
-    	}
+    Sw <- exp(-Z.mort)
 
     lx <- Sw
 		mx.new <- mx * lx
