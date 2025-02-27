@@ -269,9 +269,9 @@ ui <- dashboardPage(skin = "blue",
                                         radioButtons("adv.age0S.sel","Age-0 survival options",opts.adv),
                                         numericInput("age0S.mu.custom","Mean (default = 0.0556)",0.0556,min=0,max=0.5,step=0.0001),
                                         numericInput("age0S.var.custom","Variance (default = 0.000124)",0.000124,min=0,max=0.5,step=0.000001)))),
-                    fluidRow(box(title="Age-1+ Survival",status="primary",solidHeader=TRUE,width=4,
-                                 radioButtons("adv.adultS.sel","Age-1+ survival options",opts.adv))),
-                    fluidRow(box(title="Custom Age-1+ Survival",status="primary",solidHeader=TRUE,width=9,rHandsontableOutput("hot")))
+                    fluidRow(box(title="Age-1+ Natural Mortality",status="primary",solidHeader=TRUE,width=4,
+                                 radioButtons("adv.adultM.sel","Age-1+ natural mortality options",opts.adv))),
+                    fluidRow(box(title="Custom Age-1+ Natural Mortality",status="primary",solidHeader=TRUE,width=9,rHandsontableOutput("hot")))
                     
             ),
             
@@ -352,7 +352,7 @@ server <- function(input, output, session) {
        colnames(df.input) <- c("Value")
     rownames(df.input) <- c("N projection years","N simulations","Unit stock","Allee threshold",
                             "Commercial fishing","Boom dynamics","Egg survival","Fry survival",
-                            "Age-0 survival","Age-1+ survival")
+                            "Age-0 survival","Age-1+ natural mortality")
     df.input[1,1] <- input$n.projections
     df.input[2,1] <- input$n.simulations
     df.input[3,1] <- input$stock.sel
@@ -362,7 +362,7 @@ server <- function(input, output, session) {
     df.input[7,1] <- input$adv.eggS.sel
     df.input[8,1] <- input$adv.fryS.sel
     df.input[9,1] <- input$adv.age0S.sel
-    df.input[10,1] <- input$adv.adultS.sel
+    df.input[10,1] <- input$adv.adultM.sel
       return(df.input)
   },rownames = TRUE)
   ##################################################
@@ -690,7 +690,7 @@ server <- function(input, output, session) {
 
   
   ##################################################
-  ##  CUSTOM AGE-1+ SURVIVAL INPUT  ################
+  ##  CUSTOM AGE-1+ NATURAL MORTALITY INPUT  #######
   ################################################## 
   # Create a reactive value to hold the data
   customS <- reactiveValues(data = NULL)
@@ -712,14 +712,14 @@ server <- function(input, output, session) {
   # Render the rhandsontable
   output$hot <- renderRHandsontable({
     if (!is.null(customS$data)) {
-      rhandsontable(customS$data, readOnly = (input$adv.adultS.sel == "Default")) %>%
-        hot_col(col = seq_len(ncol(customS$data)), type = "numeric")  # Ensure numeric columns
+      rhandsontable(customM$data, readOnly = (input$adv.adultM.sel == "Default")) %>%
+        hot_col(col = seq_len(ncol(customM$data)), type = "numeric")  # Ensure numeric columns
     }
   })
   
   # Enable or disable the table based on selection
-  observeEvent(input$adv.adultS.sel, {
-    if (input$adv.adultS.sel == "Default") {
+  observeEvent(input$adv.adultM.sel, {
+    if (input$adv.adultM.sel == "Default") {
       shinyjs::disable("hot")
     } else {
       shinyjs::enable("hot")
@@ -819,12 +819,13 @@ server <- function(input, output, session) {
       earlyS[3,3] = input$age0S.var.custom
     }    
   
-    customS.use <- input$adv.adultS.sel
-    S.custom <- customS$data
+    customM.use <- input$adv.adultM.sel
+    M.custom <- customM$data
 
     # generate life history parameters
     message("generating life history parameters...")
-    lh <- lifehistory.sims(n.simulations,age,vonB,n.vonB,lw,n.lw,fecund,n.fecund,earlyS)
+    lh <- lifehistory.sims(n.simulations,age,vonB,n.vonB,lw,n.lw,fecund,n.fecund,earlyS,
+                          customM.use,M.custom)
     #print(lh)  # Debugging to check the output
    # if (is.null(lh$sim.bio) || nrow(lh$sim.bio) == 0) {
    #     stop("Simulation result is empty or NULL.")
@@ -837,7 +838,7 @@ server <- function(input, output, session) {
       withProgress(message="Running simulations", value = 0,{
       simpro <- sims.run(n.projections,n.simulations,age,sexratio,mat.cisco$maturity,
                          lh$sim.bio,lh$sim.natmort,fishery.use,F.partial,
-                         customS.use,S.custom,lh$sim.weight,lh$sim.fecundity,
+                         lh$sim.weight,lh$sim.fecundity,
                          lh$sim.eggS,lh$sim.fryS,lh$sim.age0S,stocking.pro,
                          area.lake,thresh.allee,boom.use,int.boom,boom.inc)
       message("...simulations and population projections done")
