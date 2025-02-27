@@ -16,8 +16,7 @@ estBetaParams <- function(mu, var) {
 #==============================================================================================================================
 #=GENERATE LIFE HISTORY PARAMETERS=============================================================================================
 #==============================================================================================================================
-lifehistory.sims <- function(n.simulations,age,vonB,n.vonB,lw,n.lw,fecund,n.fecund,
-                             earlyS,fishery.use,F.partial,customS.use,S.custom)
+lifehistory.sims <- function(n.simulations,age,vonB,n.vonB,lw,n.lw,fecund,n.fecund,earlyS)
 {
 
 
