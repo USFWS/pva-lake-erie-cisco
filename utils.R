@@ -301,7 +301,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 
 	pop.thresh <- area.lake * thresh.allee
 
-	Sh <- runif(1, 0.12, 0.5)		#survival immediately after stocking
+	Sh <- runif(1, 0.12, 0.5)		# survival immediately after stocking
 
 	# process stocked early life stages
 	if (any(stocking.pro$age < 1)) {
@@ -318,6 +318,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 	        colnames(stocking.juv) <- c("age","month","nums")
 
 	        stocking.juv$nums <- stocking.juv$nums * 0.5        # assume half are female
+		stocking.juv$nums <- stocking.juv$nums + (stocking.juv$nums * runif(1, -0.25, 0.25))  # stocking variability      
 
 	        # monthly survival for wild egg, fry, and age 0
 	        eggS.wild.month <- Segg
@@ -330,7 +331,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 	          age == -1 ~ fryS.wild.month ^ (7-month),
 	          age == 0 ~ age0S.wild.month ^ (12-month)))
 
-	        stocking.juv$S.hatch <- stocking.juv$S.wild / 2       #half wild survival
+	        stocking.juv$S.hatch <- stocking.juv$S.wild / 2       # half wild survival
 
 	        # age-1 equivalents
 	        stocking.juv <- stocking.juv %>% mutate(age1.eq = case_when(
@@ -341,7 +342,6 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 	        age1.eq.tot <- sum(stocking.juv$age1.eq)
 
 	        n.stocked.juv[i] <- age1.eq.tot
-	        n.stocked.juv[i] <- n.stocked.juv[i] + (n.stocked.juv[i] * runif(1, -0.25, 0.25))
 
 	      }
 	    } else {
