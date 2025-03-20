@@ -13,6 +13,7 @@ library(shinycssloaders)
 library(shinydashboard)
 library(shinyjs)
 library(utils)
+library(xlsx)
 
 ##########################################################################################################
 ##  PREP  ################################################################################################
@@ -52,7 +53,6 @@ earlyS <- read_excel("cisco.xlsx",sheet="earlyS")
 #---------------------------------------------------------------------------------------------------------
 #-POPULATE LISTS------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------
-#stat.dist <- c("Fix","Uniform","Normal","Triangle")
 stock.area <- c("Lakewide","Eastern Unit","Western Unit")
 threat.apply <- c("No","Yes")
 opts.adv <- c("Default","Custom")
@@ -222,6 +222,13 @@ ui <- dashboardPage(skin = "blue",
             ##################################################
             tabItem(tabName = "menuPerturbations",
                         fluidRow(valueBox("Perturbations","perturbations to the population",icon = shiny::icon("radiation"),width=9)),
+                        fluidRow(box(title="About Recruitment Booms",status="primary",solidHeader=TRUE,width=9,
+                                    "The user may choose to apply intermittent years of strong year classes, or recruitment booms.",br(),
+                                    "If used, the user supplies the frequency of boom years.")),
+                        fluidRow(column(6,style="width:30%;",
+                                        box(title="Recruitment Dynamics",status="primary",solidHeader=TRUE,width=NULL,
+                                            radioButtons("recruit.sel","Apply boom years",threat.apply),
+                                            numericInput("YC.period","Boom year frequency (every n years)",4,min=1,max=20,step=1)))),                    
                         fluidRow(box(title="About Commercial Fishing",status="primary",solidHeader=TRUE,width=9,
                                      "The user may choose to apply a commercial fishery to the population.",br(),
                                      "If applied, the user provides the instantaneouse F rate and first age at full selection.")),
@@ -232,17 +239,7 @@ ui <- dashboardPage(skin = "blue",
                                         numericInput("Fage.sel","First age at full selection",3,min=1,max=15,step=1))),
                                 column(6,style="width:45%",
                                     box(title="Commercial Fishery Selectivity",status="primary",solidHeader=TRUE,
-                                        plotOutput("p.select"),width=NULL))),
-                        fluidRow(box(title="About Recruitment Booms",status="primary",solidHeader=TRUE,width=9,
-                                    "The user may choose to apply intermittent years of strong year classes, or recruitment booms.",br(),
-                                    "If used, the user supplies the frequency of boom years and the percent increase in fry survival, which
-                                    is how the recruitment booms are defined.")),
-                        fluidRow(column(6,style="width:30%;",
-                                        box(title="Recruitment Dynamics",status="primary",solidHeader=TRUE,width=NULL,
-                                            radioButtons("boom.sel","Apply boom years",threat.apply),
-                                            numericInput("YC.period","Boom year frequency (every n years)",4,min=1,max=20,step=1),
-                                            numericInput("pct.boom","Percent increase fry survival",600,min=10,max=1000,step=10)
-                                            )))
+                                        plotOutput("p.select"),width=NULL)))
             ),
 
             
@@ -331,7 +328,7 @@ ui <- dashboardPage(skin = "blue",
             ##################################################
             tabItem(tabName = "menuInfo",
                             fluidRow(valueBox("Additional Info","Check here for latest update information",icon = shiny::icon("info"),width=9)),
-                            fluidRow("Last update: 27 February 2025"),
+                            fluidRow("Last update: 20 March 2025"),
                             fluidRow("Issue tracking: laura_lee@fws.gov"))
 
             )
@@ -358,7 +355,7 @@ server <- function(input, output, session) {
     df.input[3,1] <- input$stock.sel
     df.input[4,1] <- input$thresh.sel
     df.input[5,1] <- input$fishery.sel
-    df.input[6,1] <- input$boom.sel
+    df.input[6,1] <- input$recruit.sel
     df.input[7,1] <- input$adv.eggS.sel
     df.input[8,1] <- input$adv.fryS.sel
     df.input[9,1] <- input$adv.age0S.sel
@@ -618,7 +615,7 @@ server <- function(input, output, session) {
 
     sel.not <- as.data.frame(rep(0,input$Fage.sel-1))
     colnames(sel.not) <- c('Selectivity')
-    sel.full <- as.data.frame(rep(1,15-input$Fage.sel+1))
+    sel.full <- as.data.frame(rep(1,age.max-input$Fage.sel+1))
     colnames(sel.full) <- c('Selectivity')
 
     select.gear <- rbind(sel.not,sel.full)
@@ -642,13 +639,11 @@ server <- function(input, output, session) {
   ##################################################
   ##  ENABLE/DISABLE BOOM YEAR-CLASS OPTIONS  ######
   ##################################################
-  observeEvent(input$boom.sel, {
-    if (input$boom.sel == "No") {
+  observeEvent(input$recruit.sel, {
+    if (input$recruit.sel == "No") {
       shinyjs::disable(id = "YC.period")
-      shinyjs::disable(id = "pct.boom")
     } else {
       shinyjs::enable(id = "YC.period")
-      shinyjs::enable(id = "pct.boom")
     }
   })  ##################################################
   
@@ -660,6 +655,8 @@ server <- function(input, output, session) {
     if (input$adv.eggS.sel == "Default") {
       shinyjs::disable(id = "eggS.mu.custom")
       shinyjs::disable(id = "eggS.var.custom")
+      reset(id = "eggS.mu.custom", asis = FALSE)
+      reset(id = "eggS.var.custom", asis = FALSE)
     } else {
       shinyjs::enable(id = "eggS.mu.custom")
       shinyjs::enable(id = "eggS.var.custom")
@@ -670,6 +667,8 @@ server <- function(input, output, session) {
     if (input$adv.fryS.sel == "Default") {
       shinyjs::disable(id = "fryS.mu.custom")
       shinyjs::disable(id = "fryS.var.custom")
+      reset(id = "fryS.mu.custom", asis = FALSE)
+      reset(id = "fryS.var.custom", asis = FALSE)      
     } else {
       shinyjs::enable(id = "fryS.mu.custom")
       shinyjs::enable(id = "fryS.var.custom")
@@ -680,6 +679,8 @@ server <- function(input, output, session) {
     if (input$adv.age0S.sel == "Default") {
       shinyjs::disable(id = "age0S.mu.custom")
       shinyjs::disable(id = "age0S.var.custom")
+      reset(id = "age0S.mu.custom", asis = FALSE)
+      reset(id = "age0S.var.custom", asis = FALSE)
     } else {
       shinyjs::enable(id = "age0S.mu.custom")
       shinyjs::enable(id = "age0S.var.custom")
@@ -721,6 +722,7 @@ server <- function(input, output, session) {
   observeEvent(input$adv.adultM.sel, {
     if (input$adv.adultM.sel == "Default") {
       shinyjs::disable("hot")
+      customM$data <- NULL
     } else {
       shinyjs::enable("hot")
     }
@@ -775,7 +777,7 @@ server <- function(input, output, session) {
    
    if (any(stocking.pro$age == -1)) {
      check2 <- subset(stocking.pro,stocking.pro$age == -1)
-     if (any(check2$month > 6)) {
+     if (any(check2$month > 5)) {
        validate("fry can only be stocked in months 1 through 5")
      }
    }
@@ -800,10 +802,9 @@ server <- function(input, output, session) {
     select.gear <- c(sel.not,sel.full)
     F.partial <- F.rate * select.gear
     
-    boom.use <- input$boom.sel
+    recruit.use <- input$recruit.sel
     int.boom <- input$YC.period
-    boom.inc <- input$pct.boom
-    
+  
     if (input$adv.eggS.sel == "Custom") {
       earlyS[1,2] = input$eggS.mu.custom
       earlyS[1,3] = input$eggS.var.custom
@@ -826,10 +827,6 @@ server <- function(input, output, session) {
     message("generating life history parameters...")
     lh <- lifehistory.sims(n.simulations,age,vonB,n.vonB,lw,n.lw,fecund,n.fecund,earlyS,
                           customM.use,M.custom)
-    #print(lh)  # Debugging to check the output
-   # if (is.null(lh$sim.bio) || nrow(lh$sim.bio) == 0) {
-   #     stop("Simulation result is empty or NULL.")
-   # }
     message("...life history parameters done")
 
 
@@ -840,7 +837,7 @@ server <- function(input, output, session) {
                          lh$sim.bio,lh$sim.natmort,fishery.use,F.partial,
                          lh$sim.weight,lh$sim.fecundity,
                          lh$sim.eggS,lh$sim.fryS,lh$sim.age0S,stocking.pro,
-                         area.lake,thresh.allee,boom.use,int.boom,boom.inc)
+                         area.lake,thresh.allee,recruit.use,int.boom)
       message("...simulations and population projections done")
     })
 
@@ -855,12 +852,6 @@ server <- function(input, output, session) {
 
   })
   ##################################################
-
-
-#  disable Run button
-#  observeEvent(input$btnRunModel, {
-#    shinyjs::disable("btnRunModel")
-#  })
 
 
   ##################################################
@@ -911,8 +902,8 @@ server <- function(input, output, session) {
   })
   
   output$out.summary4 <- renderText({
-    if (input$boom.sel == "Yes") {
-      paste("Boom dynamics were applied by increasing fry survival",input$pct.boom,"% every",input$YC.period,"years, on average.")
+    if (input$recruit.sel == "Yes") {
+      paste("Boom dynamics were applied at a frequency of every",input$YC.period,"years, on average.")
     } else {
       paste("Boom dynamics were not applied.")
     }
@@ -928,11 +919,6 @@ server <- function(input, output, session) {
     paste("A total of",e,"simulations resulted in extinction (<1 fish in final year); this equates to an extinction
           probability of",p.e,".")
   })
-  
-  #  output$out.summary7 <- renderText({
-  #    p.e <- pva()[[3]]$p.extinct
-  #    paste("This equates to an extinction probability of",p.e,".")
-  #  })
   
   output$out.summary8 <- renderText({
     pct.exceed <- pva()[[3]]$percent.exceed

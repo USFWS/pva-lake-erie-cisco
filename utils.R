@@ -38,15 +38,15 @@ set.seed(8675309)
 for (j in 1:n.simulations) {
 
 	# Set von Bertalanffy age-length parameters
-  	pick.vonB <- sample(1:n.vonB,1,replace=FALSE)
-  	Linf <- as.numeric(vonB[pick.vonB,1])
-  	K <- as.numeric(vonB[pick.vonB,2])
-  	t0 <- as.numeric(vonB[pick.vonB,3])
+  pick.vonB <- sample(1:n.vonB,1,replace=FALSE)
+  Linf <- as.numeric(vonB[pick.vonB,1])
+  K <- as.numeric(vonB[pick.vonB,2])
+  t0 <- as.numeric(vonB[pick.vonB,3])
 
 	# Set length-weight parameters
-  	pick.lw <- sample(1:n.lw,1,replace=FALSE)
-  	lw.a <- as.numeric(lw[pick.lw,1])
-  	lw.b <- as.numeric(lw[pick.lw,2])
+  pick.lw <- sample(1:n.lw,1,replace=FALSE)
+  lw.a <- as.numeric(lw[pick.lw,1])
+  lw.b <- as.numeric(lw[pick.lw,2])
 
 	# Set fecundity-weight parameters
 	pick.fecund <- sample(1:n.fecund,1,replace=FALSE)
@@ -54,7 +54,7 @@ for (j in 1:n.simulations) {
 	f.b <- as.numeric(fecund[pick.fecund,2])
 	f.type <- fecund[pick.fecund,3]
 	
-  	# early life survival
+  # early life survival
 	eggS.mu <- as.numeric(earlyS[1,2])
 	eggS.var <- as.numeric(earlyS[1,3])
 	fryS.mu <- as.numeric(earlyS[2,2])
@@ -66,7 +66,7 @@ for (j in 1:n.simulations) {
 	eggS <- estBetaParams(eggS.mu,eggS.var)$sim.beta
 	
 	# Set fry survival
-  	fryS <- estBetaParams(fryS.mu,fryS.var)$sim.beta
+  fryS <- estBetaParams(fryS.mu,fryS.var)$sim.beta
 	
 	# Set age-0 survival
 	age0S <- estBetaParams(age0S.mu,age0S.var)$sim.beta
@@ -98,15 +98,15 @@ for (j in 1:n.simulations) {
 	sim.bio[j,4] <- lw.a
 	sim.bio[j,5] <- lw.b
 	sim.bio[j,6] <- f.a
-  	sim.bio[j,7] <- f.b
+  sim.bio[j,7] <- f.b
 	sim.bio[j,8] <- f.type
-  	sim.bio[j,9] <- eggS
-  	sim.bio[j,10] <- fryS
-  	sim.bio[j,11] <- age0S
+  sim.bio[j,9] <- eggS
+  sim.bio[j,10] <- fryS
+  sim.bio[j,11] <- age0S
 
 	# Store Derived Parameters
 	sim.length <- rbind(sim.length,length)
-  	sim.weight <- rbind(sim.weight,weight)
+  sim.weight <- rbind(sim.weight,weight)
 	sim.natmort <- rbind(sim.natmort,natmort)
 	sim.fecundity <- rbind(sim.fecundity,fecundity)
 	sim.eggS <- rbind(sim.eggS,eggS)
@@ -137,9 +137,11 @@ return(list(sim.bio = sim.bio, sim.length = sim.length, sim.weight = sim.weight,
 #==============================================================================================================================
 #=RUN SIMULATIONS==============================================================================================================
 #==============================================================================================================================
-sims.run <- function(n.projections,n.simulations,age,sexratio,maturity,sim.bio,sim.natmort,
-                     fishery.use,F.partial,sim.weight,sim.fecundity,
-                     sim.eggS,sim.fryS,sim.age0S,stocking.pro,area.lake,thresh.allee,boom.use,int.boom,boom.inc)
+sims.run <- function(n.projections,n.simulations,age,sexratio,maturity,
+                     sim.bio,sim.natmort,fishery.use,F.partial,
+                     sim.weight,sim.fecundity,
+                     sim.eggS,sim.fryS,sim.age0S,stocking.pro,
+                     area.lake,thresh.allee,recruit.use,int.boom)
 
 {
 
@@ -163,16 +165,18 @@ sim.mature.hatchery <- data.frame()
 sim.other <- matrix(nrow=n.projections,ncol=n.simulations)
 sim.mature.other <- matrix(nrow=n.projections,ncol=n.simulations)
 
+sim.track.mult <- data.frame()
+
 lambda.wild <- data.frame()
 changes.all <- data.frame()
 
 
 #-Initiate Progress Bar--------------------------------------------------------------------------------------------------------
-pb <- txtProgressBar(min = 0,      			# Minimum value of the progress bar
+pb <- txtProgressBar(min = 0,      			        # Minimum value of the progress bar
                      max = n.simulations,   		# Maximum value of the progress bar
-                     style = 3,    			# Progress bar style (also available style = 1 and style = 2)
-                     width = 50,   			# Progress bar width. Defaults to getOption("width")
-                     char = "=")   			# Character used to create the bar
+                     style = 3,    			        # Progress bar style (also available style = 1 and style = 2)
+                     width = 50,   			        # Progress bar width. Defaults to getOption("width")
+                     char = "=")   			        # Character used to create the bar
 
 
 #-Simulations------------------------------------------------------------------------------------------------------------------
@@ -183,14 +187,14 @@ for (j in 1:n.simulations) {
   Sys.sleep(0.1)
 
 	# Mx for Wild Fish Leslie Matrix
-  	fecundity <- as.double(sim.fecundity[j,])
+  fecundity <- as.double(sim.fecundity[j,])
   
 	# Mx for Stocked Fish Leslie Matrix
 	mx.stocked <- rep(0,max(age))
 
 
 	# Natural Mortality of Adult Wild Fish
-  	Mw <- as.numeric(sim.natmort[j,])
+  Mw <- as.numeric(sim.natmort[j,])
 
 
 	# Weight at Age
@@ -209,7 +213,7 @@ for (j in 1:n.simulations) {
 	# Run Population Projections
 	p <- pop.stockpro(n.projections, sexratio, maturity, fecundity, mx.stocked, Mw, 
 	                  fishery.use, F.partial, waa, area.lake, thresh.allee,
-	                  Segg, Sfry, Sage0, stocking.pro, boom.use, int.boom, boom.inc)
+	                  Segg, Sfry, Sage0, stocking.pro, recruit.use, int.boom)
 
 	# Store Projection Results
 	sim.pop[,j] <- p$pop.sizes
@@ -232,6 +236,8 @@ for (j in 1:n.simulations) {
 	# Determine Number Spawners
 	sim.mature.pop <- rbind(sim.mature.pop,colSums(age.mature.pop))
 	sim.mature.hatchery <- rbind(sim.mature.hatchery,colSums(age.mature.hatchery))
+	
+	sim.track.mult <- rbind(sim.track.mult,p$track.mult)
 
 
 	# Progress Bar
@@ -241,7 +247,6 @@ for (j in 1:n.simulations) {
 }
 
 close(pb)
-
 
 sim.popwt <- sim.popwt/1000000	#==>convert to metric tons
 
@@ -267,7 +272,7 @@ return(list(sim.pop = sim.pop, sim.popwt = sim.popwt, sim.wild = sim.wild, sim.s
 #==============================================================================================================================
 pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocked, Mw, 
                          fishery.use, F.partial, waa, area.lake, thresh.allee,
-                         Segg, Sfry, Sage0, stocking.pro, boom.use, int.boom, boom.inc )
+                         Segg, Sfry, Sage0, stocking.pro, recruit.use, int.boom)
 {
 
 	n.age <- length(maturity)
@@ -275,9 +280,9 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 	x <- length(Mw)
 	t <- n.projections
 
-  	n.wild <- matrix(numeric(x * t), nrow = x)
-  	n.stocked.juv <- numeric(t)
-  	n.stocked <- matrix(numeric(x * t), nrow = x)
+  n.wild <- matrix(numeric(x * t), nrow = x)
+  n.stocked.juv <- numeric(t)
+  n.stocked <- matrix(numeric(x * t), nrow = x)
 	n.ss <- matrix(numeric(x * t), nrow = x)
 	n.hatchery <- matrix(numeric(x * t), nrow = x)
 	n.mature <- matrix(numeric(x * t), nrow = x)
@@ -289,12 +294,14 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 	pop <- numeric(t)
 	pop.wt <- numeric(t)
 	pop.wild <- numeric(t)
-  	pop.stocked <- numeric(t)
+  pop.stocked <- numeric(t)
 	pop.ss <- numeric(t)
 	pop.hatchery <- numeric(t)
 	pop.recruits <- numeric(t)
 	pop.wildage1 <- numeric(t)
 	pop.mature <- numeric(t)
+	
+	track.mult <- numeric(t)
 
 	lambda.Awild <- numeric(t)
 	change <- numeric(t - 1)
@@ -318,7 +325,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 	        colnames(stocking.juv) <- c("age","month","nums")
 
 	        stocking.juv$nums <- stocking.juv$nums * 0.5        # assume half are female
-		stocking.juv$nums <- stocking.juv$nums + (stocking.juv$nums * runif(1, -0.25, 0.25))  # stocking variability      
+		      stocking.juv$nums <- stocking.juv$nums + (stocking.juv$nums * runif(1, -0.25, 0.25))  # stocking variability      
 
 	        # monthly survival for wild egg, fry, and age 0
 	        eggS.wild.month <- Segg
@@ -357,9 +364,10 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 
 	  if (i <= n.stockpro && any(stocking.pro$age > 0)) {
 	    stocking.adult <- subset(stocking.pro,stocking.pro$age > 0)
-      	    n.var <- runif(n.stockpro, -0.25, 0.25)
-            stocking.adult[-1:-2] <- stocking.adult[-1:-2] + (stocking.adult[-1:-2] * n.var)
+      n.var <- runif(n.stockpro, -0.25, 0.25)
+      stocking.adult[-1:-2] <- stocking.adult[-1:-2] + (stocking.adult[-1:-2] * n.var)
 	    stocking.adult[-1:-2] <- stocking.adult[-1:-2] * Sh
+	    stocking.adult[-1:-2] <- stocking.adult[-1:-2] * 0.5    # assume half are female
 	  } else {
 	    stocking.adult <- data.frame(matrix(nrow = 1, ncol = n.stockpro + 2))
 	    stocking.adult[1,1] <- 1
@@ -378,24 +386,26 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
     stocking.adult <- stocking.adult %>% replace(is.na(.), 0)
 
     
-    # boom dynamics
-    p.boom <- 1/int.boom
-    fryS.inc <- boom.inc/100
-
-    rnd.boom <- runif(1)
-    if (boom.use == "Yes") {
-      if (rnd.boom < p.boom) {
-        Sfry.boom <- Sfry * (fryS.inc + 1)
+    # recruit dynamics
+    if (recruit.use == "Yes") {
+      R.gate <- rbinom(1,1,1/int.boom)
+      if (R.gate == 0) {
+        earlyS.mult <- 1
       } else {
-        Sfry.boom <- Sfry
+        log.earlyS.mult <- rlnormTrunc(1,meanlog=0.25,sdlog=1,min=1.9,max=6.4)
+        earlyS.mult <- exp(log.earlyS.mult)
       }
+      
     } else {
-      Sfry.boom <- Sfry
+      earlyS.mult <- 1
     }
 
+    track.mult[i] <- earlyS.mult
+
+    mx <- sexratio * maturity * fecundity * Segg * Sfry * Sage0 * earlyS.mult
     
-    mx <- sexratio * maturity * fecundity * Segg * Sfry.boom * Sage0
-    
+
+    # random variability on age-1+ natural mortality
     M.rand.age1 <- runif(1, -0.30, 0.30)
     M.rand.age2up <- runif(1, -0.10, 0.10)
 
@@ -419,8 +429,7 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 		mx.new <- mx * lx
 		A.wild <- make_leslie_mpm(survival = lx, fecundity = mx.new, n_stages = n.age, split = FALSE)
 		#A.wild[n.age,n.age] <- 0	#==>comment out if using a plus group
-		lambda.Awild[i] <- lambda(A.wild)
-
+		
 		lx.month <- lx ^ (1/12)
 		n.month.remain <- 12 - stocking.adult$month - 1
 		lx.partial <- lx.month ^ n.month.remain
@@ -436,13 +445,13 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 		A.sr <- make_leslie_mpm(survival = 0, fecundity = mx.new, n_stages = n.age, split = FALSE)
 		#A.sr[n.age,n.age] <- 0		#==>comment out if using a plus group
 
+		
 		if (i == 1) {
 			n.ss[,i] <- 0
 			n.wild[,i] <- 0
 		} else {
 			n.ss[,i] <- (A.stocked %*% n.stocked[,i-1]) + (A.ss %*% n.ss[,i-1])
 			n.wild[,i] <- (A.wild %*% n.wild[,i-1]) + (A.sr %*% n.ss[,i-1])			
-			
 			n.ss[1,i] <- n.ss[1,i] + n.stocked.juv[i]
 		}
 
@@ -451,12 +460,13 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 			if (i == n.stockpro + 1) {
 				n.stocked[,i] <- 0
 			} else {
-				n.stocked[,i] <- stocking.adult[,i+2] * 0.5     # assume half are female
-				
+				n.stocked[,i] <- stocking.adult[,i+2]
+        n.stocked[1,i] <- n.stocked[1,i] + n.stocked.juv[i]
 			}
 		} else {
 			n.stocked[,i] <- 0
 		}
+
 
 		# allee effect
 		if(i > 1) {
@@ -500,12 +510,12 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 	w <- stage[, t]
 
 
-	pop.proj <- list(lambda = pop[t]/pop[t - 1], lambda.Awild = lambda.Awild, stable.stage = w/sum(w),
+	pop.proj <- list(lambda = pop[t]/pop[t - 1], stable.stage = w/sum(w),
         			stage.vectors = stage, pop.sizes = pop, pop.changes = change,
 				      stage.wild = pop.wild, stage.stocked = pop.stocked,
 				      stage.hatchery = pop.hatchery, hatchery.vectors = n.hatchery,
 				      pop.weight = pop.wt, S1 = S1, pop.recruits = pop.recruits,
-				      pop.wildage1 = pop.wildage1,
+				      pop.wildage1 = pop.wildage1,track.mult = track.mult,
 				      Segg = Segg,Sfry=Sfry,Sage0=Sage0)
 }
 
