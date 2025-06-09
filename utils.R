@@ -48,7 +48,7 @@ for (j in 1:n.simulations) {
   lw.a <- as.numeric(lw[pick.lw,1])
   lw.b <- as.numeric(lw[pick.lw,2])
 
-	# Set fecundity-weight parameters
+	# Set fecundity parameters
 	pick.fecund <- sample(1:n.fecund,1,replace=FALSE)
 	f.a <- as.numeric(fecund[pick.fecund,1])
 	f.b <- as.numeric(fecund[pick.fecund,2])
