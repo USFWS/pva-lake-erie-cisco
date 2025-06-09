@@ -1,6 +1,6 @@
 ##########################################################################################################
 ##  pva-lake-erie-cisco  #################################################################################
-##  version 2.0.0  #######################################################################################
+##  version 2.0.1  #######################################################################################
 ##########################################################################################################
 
 library(compositions)
@@ -333,7 +333,7 @@ ui <- dashboardPage(skin = "blue",
             ##################################################
             tabItem(tabName = "menuInfo",
                             fluidRow(valueBox("Additional Info","Check here for latest update information",icon = shiny::icon("info"),width=9)),
-                            fluidRow("Last update: 6 June 2025"),
+                            fluidRow("Last update: 9 June 2025"),
                             fluidRow("Issue tracking: laura_lee@fws.gov"))
 
             )
@@ -427,7 +427,7 @@ server <- function(input, output, session) {
   output$p.eggS <- renderPlot({
 
     # Generate distribution
-    dist.eggS <- rbeta(10000,1.438715,519.835)
+    dist.eggS <- rbeta(10000,0.4443403,51.04353)
     dist.eggS <- as.data.frame(dist.eggS)
     colnames(dist.eggS) <- c("eggS")
 
@@ -1071,3 +1071,5 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+
+
