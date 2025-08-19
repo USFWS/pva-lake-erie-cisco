@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.1.0 - 2024-08-19
+Change and correction to model summary output
+
+## Added
+* When an allee effect is assumed, the model summary reports number of simulations that resulted in wild production at some point in time
+
+## Fixed
+* Corrected calculation of the number of simulations that resulted in a lambda greater than or equal to 1.0 so that NA values are handled correctly
+
+
 ## v2.0.1 - 2025-06-09
 Corrected egg survival figure 
 
