@@ -1,6 +1,6 @@
 ##########################################################################################################
 ##  pva-lake-erie-cisco  #################################################################################
-##  version 2.0.1  #######################################################################################
+##  version 2.1.0  #######################################################################################
 ##########################################################################################################
 
 library(compositions)
@@ -333,7 +333,7 @@ ui <- dashboardPage(skin = "blue",
             ##################################################
             tabItem(tabName = "menuInfo",
                             fluidRow(valueBox("Additional Info","Check here for latest update information",icon = shiny::icon("info"),width=9)),
-                            fluidRow("Last update: 9 June 2025"),
+                            fluidRow("Last update: 19 August 2025"),
                             fluidRow("Issue tracking: laura_lee@fws.gov"))
 
             )
@@ -849,8 +849,10 @@ server <- function(input, output, session) {
 
     # compute summary statistics
     message("computing summary statistics...")
-    calcs <- stats.calc(n.projections,n.simulations,n.stockpro,simpro$lambda.wild,simpro$changes.all,simpro$sim.pop,simpro$sim.mature.pop,
-                    simpro$sim.hatchery,simpro$sim.other,simpro$sim.mature.hatchery,simpro$sim.mature.other,simpro$sim.popwt)
+    calcs <- stats.calc(n.projections,n.simulations,n.stockpro,simpro$lambda.wild,
+                        simpro$changes.all,simpro$sim.pop,simpro$sim.mature.pop,simpro$sim.wild,
+                        simpro$sim.hatchery,simpro$sim.other,simpro$sim.mature.hatchery,
+                        simpro$sim.mature.other,simpro$sim.popwt)
     message("...done computing summary statistics")
 
     return(list(lh=lh,simpro=simpro,calcs=calcs))
@@ -891,8 +893,10 @@ server <- function(input, output, session) {
   })
   
   output$out.summary2 <- renderText({
+    wildprod <- pva()[[3]]$n.wildprod
     if (input$thresh.sel > 0) {
-      paste("An Allee effect was assumed with a threshold of", input$thresh.sel, "number/hectare.")
+      paste("An Allee effect was assumed with a threshold of", input$thresh.sel, "number/hectare.
+            A total of",wildprod,"simulations resulted in wild production at some point in time.")
     } else {
       paste("No Allee effect was assumed.")
     }
