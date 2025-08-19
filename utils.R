@@ -48,7 +48,7 @@ for (j in 1:n.simulations) {
   lw.a <- as.numeric(lw[pick.lw,1])
   lw.b <- as.numeric(lw[pick.lw,2])
 
-	# Set fecundity parameters
+	# Set fecundity-weight parameters
 	pick.fecund <- sample(1:n.fecund,1,replace=FALSE)
 	f.a <- as.numeric(fecund[pick.fecund,1])
 	f.b <- as.numeric(fecund[pick.fecund,2])
@@ -527,8 +527,9 @@ pop.stockpro <- function(n.projections, sexratio, maturity, fecundity, mx.stocke
 #==============================================================================================================================
 #=COMPUTE SUMMARY STATISTICS===================================================================================================
 #==============================================================================================================================
-stats.calc <- function(n.projections,n.simulations,n.stockpro,lambda.wild,changes.all,sim.pop,sim.mature.pop,sim.hatchery,sim.other,
-				sim.mature.hatchery,sim.mature.other,sim.popwt)
+stats.calc <- function(n.projections,n.simulations,n.stockpro,lambda.wild,changes.all,
+                       sim.pop,sim.mature.pop,sim.wild,sim.hatchery,sim.other,sim.mature.hatchery,
+                       sim.mature.other,sim.popwt)
 
 {
 
@@ -550,7 +551,7 @@ copy.lambdasim.ps <- as.data.frame(lambdasim.ps)
 colnames(copy.lambdasim.ps) <- c("lambda")
 
 copy.lambdasim.ps$exceed <- ifelse(copy.lambdasim.ps$lambda >= 1, 1, 0)
-n.exceed <- sum(copy.lambdasim.ps$exceed)
+n.exceed <- sum(copy.lambdasim.ps$exceed, na.rm = TRUE)
 percent.exceed <- round((n.exceed/n.simulations)*100,digits=1)
 
 
@@ -559,6 +560,13 @@ lambda.stats <- quantile(lambdasim.ps,probs=c(0.05,0.25,0.50,0.75,0.95),na.rm=TR
 tlambda.stats <- t(lambda.stats)
 tlambda.stats <- as.data.frame(tlambda.stats)
 colnames(tlambda.stats) <- c("P05","P25","Median","P75","P95")
+
+
+#------------------------------------------------------------------------------------------------------------------------------
+#-COMPUTE N SIMS WITH WILD PRODUCTION------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------------
+summary.wild <- colSums(sim.wild)
+n.wildprod <- sum(summary.wild>0)
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -718,7 +726,7 @@ p.extinct <- extinct / n.simulations
 
 #-Save Results-----------------------------------------------------------------------------------------------------------------
 return(list(lambdasim.ps = lambdasim.ps, tlambda.stats = tlambda.stats, tend.stats = tend.stats, tendmat.stats = tendmat.stats,
-            extinct = extinct, p.extinct = p.extinct, percent.exceed = percent.exceed,
+            extinct = extinct, p.extinct = p.extinct, percent.exceed = percent.exceed,n.wildprod = n.wildprod,
             tpop.quantile = tpop.quantile, tpop.allquantile = tpop.allquantile, pop.origin.quantile = pop.origin.quantile,
             tmature.quantile = tmature.quantile, mature.origin.quantile = mature.origin.quantile,
             tpopwt.quantile = tpopwt.quantile, end.origin.stats = end.origin.stats))
